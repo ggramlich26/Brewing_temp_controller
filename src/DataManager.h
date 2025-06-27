@@ -21,7 +21,7 @@
 #define	DEFAULT_PID_P			70
 #define	MAX_PID_P				100
 #define	MIN_PID_P				0.00
-#define DEFAULT_PID_I			0.1
+#define DEFAULT_PID_I			0.0
 #define MAX_PID_I				100
 #define MIN_PID_I				0
 #define DEFAULT_PID_D			2
