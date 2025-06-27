@@ -72,10 +72,10 @@ void DisplayManager::displayTemps(){
 	display->drawString(0, LINE_2_ORIG, String("T1: "));
 	display->drawString(0, LINE_3_ORIG, String("T2: "));
 	int temp = dev->getTemp1();
-	display->drawString(30, LINE_1_ORIG, String((int)(DataManager::getOut1Setpoint())) + " °C");
-	display->drawString(30, LINE_2_ORIG, temp!=9999?(String(temp) + " °C"):"NC");
+	display->drawString(30, LINE_1_ORIG, String((int)(DataManager::getOut1Setpoint())) + " ï¿½C");
+	display->drawString(30, LINE_2_ORIG, dev->getTemp1Connected()?(String(temp) + " ï¿½C"):"NC");
 	temp = dev->getTemp2();
-	display->drawString(30, LINE_3_ORIG, temp!=9999?(String(temp) + " °C"):"NC");
+	display->drawString(30, LINE_3_ORIG, dev->getTemp2Connected()?(String(temp) + " ï¿½C"):"NC");
 }
 
 void DisplayManager::displayPower(){

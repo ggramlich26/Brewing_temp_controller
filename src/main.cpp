@@ -89,6 +89,10 @@ void loop()
 	pid->SetTunings(DataManager::getOut1P(), DataManager::getOut1I(),
 			DataManager::getOut1D());
 	pid->Compute();
+	// turn off heater if connection to temperature sensor lost
+	if(!dev->getTemp1Connected()){
+		pid_output = 0;
+	}
 	dev->enableOut1(pid_output);
 	displayManager->setPowerLevel(pid_output/100.0);
 
@@ -102,5 +106,8 @@ void loop()
 			DataManager::mqttPublishTemp(dev->getTemp2(), 2);
 		if(dev->getTemp3Connected())
 			DataManager::mqttPublishTemp(dev->getTemp3(), 3);
+		DataManager::mqttPublishSensorError(!dev->getTemp1Connected(), 1);
+		DataManager::mqttPublishSensorError(!dev->getTemp2Connected(), 2);
+		DataManager::mqttPublishSensorError(!dev->getTemp3Connected(), 3);
 	}
 }

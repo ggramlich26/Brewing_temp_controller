@@ -363,6 +363,14 @@ void DataManager::mqttPublishTemp(float temp, int sensorNumber){
 	if(mqttEnabled && WiFi.isConnected() && pubSubClient->connected())
 		pubSubClient->publish((mqttPublishTrunc+"temp"+sensorNumber).c_str(), String(temp).c_str());
 }
+
+void DataManager::mqttPublishSensorError(bool error, int sensorNumber){
+	if(sensorNumber < 1 || sensorNumber > 3)
+		return;
+	if(mqttEnabled && WiFi.isConnected() && pubSubClient->connected())
+		pubSubClient->publish((mqttPublishTrunc+"sensor"+sensorNumber).c_str(), error?"error":"ok");
+}
+
 bool DataManager::getMqttEnabled(){
 	return mqttEnabled != 0;
 }

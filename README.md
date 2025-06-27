@@ -5,6 +5,9 @@ This project adds PID temperature control to existing devices. It is intended to
 - temp1
 - temp2
 - temp3
+- sensor1
+- sensor2
+- sensor3
 - setpoint (if changed)
 - updateInterval (if changed through web interface)
 - P (if changed through web interface)

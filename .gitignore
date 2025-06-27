@@ -1,6 +1,17 @@
 Debug/
 Release/
 .settings/
+.pio/build/
+.pio/libdeps/
+tools/*.bin
+tools/*.lzss
+tools/*.ota
+
+# build dependent files
+.vscode/*
+
+.pio/
+
 
 # Prerequisites
 *.d
@@ -34,3 +45,10 @@ Release/
 *.exe
 *.out
 *.app
+/sloeber.ino.cpp
+*.swp
+/Release2/
+/ReleaseUbuntu/
+
+# vim related files
+*~

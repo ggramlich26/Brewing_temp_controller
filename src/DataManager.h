@@ -11,28 +11,28 @@
 #include "Arduino.h"
 #include "DeviceControl.h"
 #include <WiFiManager.h>
-#include <esp8266wifi.h>
+#include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
 #define DEFAULT_OUT_1_SETPOINT	20
 #define	MAX_OUT_1_SETPOINT		125
-#define	MIN_OUT_1_SETPOINT		10
+#define	MIN_OUT_1_SETPOINT		5
 
-#define	DEFAULT_PID_P			60
+#define	DEFAULT_PID_P			70
 #define	MAX_PID_P				100
-#define	MIN_PID_P				0.01
+#define	MIN_PID_P				0.00
 #define DEFAULT_PID_I			0.1
 #define MAX_PID_I				100
 #define MIN_PID_I				0
-#define DEFAULT_PID_D			0
+#define DEFAULT_PID_D			2
 #define MAX_PID_D				100
 #define MIN_PID_D				0
-#define DEFAULT_MQTT_UPDATE_INT	30000
+#define DEFAULT_MQTT_UPDATE_INT	5000
 #define MIN_MQTT_UPDATE_INT		500
-#define DEFAULT_MQTT_SERVER		"192.168.0.2"
+#define DEFAULT_MQTT_SERVER		"192.168.101.20"
 #define DEFAULT_MQTT_PUBLISH_TOPIC "Status"
 #define DEFAULT_MQTT_SUBSCRIBE_TOPIC "Set"
-#define DEFAULT_MQTT_CLIENT_ID	"TempController1"
+#define DEFAULT_MQTT_CLIENT_ID	"Braukessel"
 #define DEFAULT_MQTT_PASSWORD	""
 #define MQTT_MASTER_STRING	"BTC"
 
@@ -59,6 +59,7 @@ public:
 	static void setMqttEnabled(bool enabled);
 
 	static void mqttPublishTemp(float temp, int sensorNumber);
+	static void mqttPublishSensorError(bool error, int sensorNumber);
 
 	static bool getWifiConnected();
 

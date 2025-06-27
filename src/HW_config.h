@@ -8,8 +8,6 @@
 #ifndef HW_CONFIG_H_
 #define HW_CONFIG_H_
 
-#include "ADS1115_WE.h"
-
 #define	OUT1_PIN			15 //2
 
 #define TEMP1_PIN			14

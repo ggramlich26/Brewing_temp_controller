@@ -21,8 +21,12 @@ DeviceControl::~DeviceControl() {
 void DeviceControl::init(){
 	Out1PeriodStartTime = 0;
 	Out1Level = 0;
+	Serial.println("initialize buttons");
+	Serial.flush();
 	pinMode(BUTTON_UP_PIN, INPUT_PULLUP);
 	pinMode(BUTTON_DOWN_PIN, INPUT_PULLUP);
+	Serial.println("initialize buttons done");
+	Serial.flush();
 	pinMode(OUT1_PIN, OUTPUT);
 	buttonUp = new Button([](){return DeviceControl::instance()->readButtonUp();});
 	buttonDown = new Button([](){return DeviceControl::instance()->readButtonDown();});
@@ -30,45 +34,29 @@ void DeviceControl::init(){
     Out1Off();
 
     Serial.println("init oneWire");
+	Serial.flush();
 	temp1OneWire = new OneWire(TEMP1_PIN);
 	temp2OneWire = new OneWire(TEMP2_PIN);
 	temp3OneWire = new OneWire(TEMP3_PIN);
 	temp1 = new DallasTemperature(temp1OneWire);
 	temp2 = new DallasTemperature(temp2OneWire);
 	temp3 = new DallasTemperature(temp3OneWire);
-	temp1value = 9999;
-	temp2value = 9999;
-	temp3value = 9999;
+	temp1value = 0;
+	temp2value = 0;
+	temp3value = 0;
+	temp1ConsecutiveErrors = 0;
+	temp2ConsecutiveErrors = 0;
+	temp3ConsecutiveErrors = 0;
 	Serial.println("begin oneWire1");
 	temp1->begin();
-	if(temp1->getAddress(temp1Addr, 0)){
-		temp1->setResolution(temp1Addr, TEMP_RESOLUTION);
-		temp1Connected = true;
-		temp1->setWaitForConversion(false);
-	}
-	else{
-		temp1Connected = false;
-	}
 	Serial.println("begin oneWire2");
 	temp2->begin();
-	if(temp2->getAddress(temp2Addr, 0)){
-		temp2->setResolution(temp2Addr, TEMP_RESOLUTION);
-		temp2Connected = true;
-		temp2->setWaitForConversion(false);
-	}
-	else{
-		temp2Connected = false;
-	}
 	Serial.println("begin oneWire3");
 	temp3->begin();
-	if(temp3->getAddress(temp3Addr, 0)){
-		temp3->setResolution(temp3Addr, TEMP_RESOLUTION);
-		temp3Connected = true;
-		temp3->setWaitForConversion(false);
-	}
-	else{
-		temp3Connected = false;
-	}
+	temp1Connected = false;
+	temp2Connected = false;
+	temp3Connected = false;
+	connectTemperatureSensors();
 }
 
 /// update routine, that should be called regularly. Some values are only updated through this routine.
@@ -77,7 +65,9 @@ void DeviceControl::update(){
 	if(Out1Level == 0){
 		Out1Off();
 	}
-	else if(Out1Level == 100){
+	// completely on for a little below 100 as well to avoid short relay clicks
+	// with 60s SSR_PERIOD_TIME this yields a minimum off time of 5s
+	else if(Out1Level >= 92){
 		Out1On();
 	}
 	else{
@@ -101,13 +91,83 @@ void DeviceControl::update(){
 	if(millis() >= lastTempUpdateTime + TEMP_UPDATE_INTERVAL){
 		lastTempUpdateTime = millis();
 		if(temp1Connected){
-			temp1value = temp1->getTempC(temp1Addr);
+			double temp = temp1->getTempC(temp1Addr);
+			if(temp < -20 || temp > 150){
+				temp1ConsecutiveErrors++;
+				// try again in 100ms
+				lastTempUpdateTime -= (TEMP_UPDATE_INTERVAL - 100);
+				if(temp1ConsecutiveErrors >= 10){
+					temp1Connected = false;
+				}
+			}
+			else{
+				temp1value = temp;
+				temp1ConsecutiveErrors = 0;
+			}
 			temp1->requestTemperaturesByAddress(temp1Addr);
 		}
-		if(temp2Connected)
-			temp2value = temp2->getTempC(temp2Addr);
-		if(temp3Connected)
-			temp3value = temp3->getTempC(temp3Addr);
+		if(temp2Connected){
+			double temp = temp2->getTempC(temp2Addr);
+			if(temp < -20 || temp > 150){
+				temp2ConsecutiveErrors++;
+				if(temp2ConsecutiveErrors >= 10){
+					temp2Connected = false;
+				}
+			}
+			else{
+				temp2value = temp;
+				temp2ConsecutiveErrors = 0;
+			}
+			temp2->requestTemperaturesByAddress(temp2Addr);
+		}
+		if(temp3Connected){
+			double temp = temp2->getTempC(temp3Addr);
+			if(temp < -20 || temp > 150){
+				temp3ConsecutiveErrors++;
+				if(temp3ConsecutiveErrors >= 10){
+					temp3Connected = false;
+				}
+			}
+			else{
+				temp3value = temp;
+				temp3ConsecutiveErrors = 0;
+			}
+			temp3->requestTemperaturesByAddress(temp3Addr);
+		}
+		connectTemperatureSensors();
+	}
+}
+
+void DeviceControl::connectTemperatureSensors(){
+	if(!temp1Connected){
+		temp1->begin();
+		if(temp1->getAddress(temp1Addr, 0)){
+			temp1->setResolution(temp1Addr, TEMP_RESOLUTION);
+			temp1Connected = true;
+			temp1->setWaitForConversion(false);
+			temp1ConsecutiveErrors = 0;
+			temp1->requestTemperaturesByAddress(temp1Addr);
+		}
+	}
+	if(!temp2Connected){
+		temp2->begin();
+		if(temp2->getAddress(temp2Addr, 0)){
+			temp2->setResolution(temp2Addr, TEMP_RESOLUTION);
+			temp2Connected = true;
+			temp2->setWaitForConversion(false);
+			temp2ConsecutiveErrors = 0;
+			temp2->requestTemperaturesByAddress(temp2Addr);
+		}
+	}
+	if(!temp3Connected){
+		temp3->begin();
+		if(temp3->getAddress(temp3Addr, 0)){
+			temp3->setResolution(temp3Addr, TEMP_RESOLUTION);
+			temp3Connected = true;
+			temp3->setWaitForConversion(false);
+			temp3ConsecutiveErrors = 0;
+			temp3->requestTemperaturesByAddress(temp3Addr);
+		}
 	}
 }
 

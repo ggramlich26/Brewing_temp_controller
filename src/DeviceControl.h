@@ -14,7 +14,7 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
-#define SSR_PERIOD_TIME			5000
+#define SSR_PERIOD_TIME			60000
 #define	BUTTON_DEPRELL_TIME		300
 #define DIST_SWITCH_DEPRELL_TIME	100
 #define	BUTTON_LONG_PRESS_TIME	3000
@@ -60,6 +60,7 @@ private:
 	virtual ~DeviceControl();
 
 	void init();
+	void connectTemperatureSensors();
 	void Out1On();
 	void Out1Off();
 
@@ -84,6 +85,9 @@ private:
 	double temp1value;
 	double temp2value;
 	double temp3value;
+	int temp1ConsecutiveErrors;
+	int temp2ConsecutiveErrors;
+	int temp3ConsecutiveErrors;
 };
 
 #endif /* DEVICECONTROL_H_ */
